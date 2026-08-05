@@ -40,75 +40,56 @@
         <div class="card-body">
             <form id="control-form">
                 <div class="row">
-                    <!-- Cột 1: Thời gian & Môi trường -->
-                    <div class="col-lg-4 border-end pe-4">
-                        <h6 class="text-primary fw-bold section-title">1. Thời gian & Môi trường</h6>
-                        <div class="row mb-2">
-                            <div class="col-6"><label class="form-label text-muted mb-1">Tháng</label><input type="number" id="thang" class="form-control" value="8" required></div>
-                            <div class="col-6"><label class="form-label text-muted mb-1">Năm</label><input type="number" id="nam" class="form-control" value="2026" required></div>
+ <div class="row">
+                        <!-- Cột 1: Thời gian & Môi trường -->
+                        <div class="col-lg-4 border-end pe-4">
+                            <h6 class="text-primary fw-bold section-title">1. THỜI GIAN & MÔI TRƯỜNG</h6>
+                            <div class="row mb-2">
+                                <div class="col-6"><label class="form-label text-muted mb-1">Tháng</label><input type="number" id="thang" class="form-control" value="8" required></div>
+                                <div class="col-6"><label class="form-label text-muted mb-1">Năm</label><input type="number" id="nam" class="form-control" value="2026" required></div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><label class="form-label text-muted mb-1">Nhiệt độ (°C)</label><input type="number" id="nhiet_do" step="0.1" class="form-control" value="34" required></div>
+                                <div class="col-6"><label class="form-label text-muted mb-1">Độ ẩm (%)</label><input type="number" id="do_am" class="form-control" value="80" required></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted mb-1">Dự báo Bão (Số ngày)</label>
+                                <input type="number" id="so_ngay_bao" class="form-control" value="0" min="0" max="31" required>
+                            </div>
                         </div>
-                        <div class="row mb-2">
-                            <div class="col-6"><label class="form-label text-muted mb-1">Nhiệt độ (°C)</label><input type="number" id="nhiet_do" step="0.1" class="form-control" value="34" required></div>
-                            <div class="col-6"><label class="form-label text-muted mb-1">Độ ẩm (%)</label><input type="number" id="do_am" class="form-control" value="80" required></div>
+
+                        <!-- Cột 2: Kinh tế & Xã hội -->
+                        <div class="col-lg-4 border-end pe-4 ps-4">
+                            <h6 class="text-primary fw-bold section-title">2. KINH TẾ - XÃ HỘI</h6>
+                            <div class="mb-3">
+                                <label class="form-label text-muted mb-1 fw-bold text-dark">Đơn vị Điện lực</label>
+                                <select id="dien_luc" class="form-select bg-light border-primary fw-bold text-primary" onchange="capNhatKinhTe()">
+                                    <option value="TanThanh">Điện lực Tân Thạnh</option>
+                                    <option value="TamVu">Điện lực Tầm Vu</option>
+                                    <option value="TanTru">Điện lực Tân Trụ</option>
+                                    <option value="ThuThua">Điện lực Thủ Thừa</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
+                                <input type="number" id="mat_do" class="form-control" value="500" required>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><label class="form-label text-muted mb-1">Khách hàng</label><input type="number" id="khach_hang" class="form-control" value="15000" required></div>
+                                <div class="col-5"><label class="form-label text-muted mb-1">Tốc độ PT(%)</label><input type="number" id="toc_do" step="0.1" class="form-control" value="2.5" required></div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted mb-1">Dự báo Bão</label>
-                            <select id="bao" class="form-select"><option value="0">Không có bão</option><option value="1">Có bão</option></select>
+
+                        <!-- Cột 3: Phụ tải cấu thành (KWH) -->
+                        <div class="col-lg-4 ps-4">
+                            <h6 class="text-primary fw-bold section-title">3. PHỤ TẢI CẤU THÀNH (KWH)</h6>
+                            <div class="mb-2"><input type="number" id="pt1" class="form-control" placeholder="Nông, lâm nghiệp, thủy sản" required></div>
+                            <div class="mb-2"><input type="number" id="pt2" class="form-control" placeholder="Công nghiệp, xây dựng" required></div>
+                            <div class="mb-2"><input type="number" id="pt3" class="form-control" placeholder="Thương nghiệp, khách sạn..." required></div>
+                            <div class="mb-2"><input type="number" id="pt4" class="form-control" placeholder="Quản lý, tiêu dùng" required></div>
+                            <div class="mb-2"><input type="number" id="pt5" class="form-control" placeholder="Hoạt động khác" required></div>
                         </div>
                     </div>
-
-                    <!-- Cột 2: Kinh tế & Xã hội -->
-                    <div class="col-lg-4 border-end pe-4 ps-4">
-                       <!-- Cột 2: Kinh tế & Xã hội -->
-                    <div class="col-lg-4 border-end pe-4 ps-4">
-                        <h6 class="text-primary fw-bold section-title">2. KINH TẾ - XÃ HỘI</h6>
-                        
-                        <!-- MỤC CHỌN ĐƠN VỊ ĐIỆN LỰC -->
-                        <div class="mb-3">
-                            <label class="form-label text-muted mb-1 fw-bold text-dark">Đơn vị Điện lực</label>
-                            <select id="dien_luc" class="form-select bg-light border-primary fw-bold text-primary" onchange="capNhatKinhTe()">
-                                <option value="TanThanh">Điện lực Tân Thạnh</option>
-                                <option value="TamVu">Điện lực Tầm Vu</option>
-                                <option value="TanTru">Điện lực Tân Trụ</option>
-                                <option value="ThuThua">Điện lực Thủ Thừa</option>
-                            </select>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
-                            <input type="number" id="mat_do" class="form-control" value="500" required>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-7"><label class="form-label text-muted mb-1">Khách hàng</label><input type="number" id="khach_hang" class="form-control" value="15000" required></div>
-                            <div class="col-5"><label class="form-label text-muted mb-1">Tốc độ PT(%)</label><input type="number" id="toc_do" step="0.1" class="form-control" value="2.5" required></div>
-                        </div>
-                    </div> 
-                        <h6 class="text-primary fw-bold section-title">2. Kinh tế - Xã hội</h6>
-                        <div class="mb-3">
-                            <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
-                            <input type="number" id="mat_do" class="form-control" value="500" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted mb-1">Tổng số Khách hàng</label>
-                            <input type="number" id="khach_hang" class="form-control" value="15000" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted mb-1">Tốc độ Phát triển (%)</label>
-                            <input type="number" id="toc_do" step="0.1" class="form-control" value="2.5" required>
-                        </div>
-                    </div>
-
-                    <!-- Cột 3: Phụ tải Cấu thành -->
-                    <div class="col-lg-4 ps-4">
-                        <h6 class="text-primary fw-bold section-title">3. Phụ tải Cấu thành (kWh)</h6>
-                        <div class="mb-2"><input type="number" id="pt1" class="form-control" placeholder="Nông, lâm nghiệp, thủy sản" required></div>
-                        <div class="mb-2"><input type="number" id="pt2" class="form-control" placeholder="Công nghiệp, xây dựng" required></div>
-                        <div class="mb-2"><input type="number" id="pt3" class="form-control" placeholder="Thương nghiệp, khách sạn, nhà hàng" required></div>
-                        <div class="mb-2"><input type="number" id="pt4" class="form-control" placeholder="Quản lý, tiêu dùng" required></div>
-                        <div class="mb-2"><input type="number" id="pt5" class="form-control" placeholder="Hoạt động khác" required></div>
-                    </div>
-                </div>
-
-                <hr class="my-4">
 <!-- Cột 4: Lịch Công Tác (Trải dài ngang form) -->
                 <div class="col-12 mt-4 px-3">
                     <h6 class="text-primary fw-bold section-title">4. Thông tin Lịch công tác & Ngày nghỉ (Ảnh hưởng Phụ tải)</h6>
