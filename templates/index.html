@@ -7,152 +7,175 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+        .content-wrap { flex: 1; }
         .card-header { background: linear-gradient(135deg, #0d6efd, #0dcaf0); color: white; font-weight: bold; }
         .section-title { font-size: 0.95rem; border-bottom: 2px solid #0d6efd; padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase; }
         .result-box { font-size: 1.8rem; font-weight: bold; color: #198754; background: #e8f5e9; padding: 10px 20px; border-radius: 8px; border: 1px dashed #c8e6c9; display: inline-block; }
+        .footer-author { color: rgba(108, 117, 125, 0.6); font-size: 0.85rem; text-align: center; padding: 20px 0; border-top: 1px solid #dee2e6; margin-top: 40px; }
     </style>
 </head>
 <body>
-    <div class="container-fluid py-4 px-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-12 bg-white p-4 rounded shadow-sm border-start border-primary border-5">
-                <h3 class="text-primary fw-bold">⚡ PHẦN MỀM DỰ BÁO ĐIỆN THƯƠNG PHẨM TÍCH HỢP AI</h3>
-                <h5 class="text-secondary">CÔNG TY ĐIỆN LỰC TÂY NINH</h5>
-                <p class="text-muted mb-0">Đơn vị: <strong>Điện lực Tân Thạnh</strong> | Tác giả: Huỳnh Ngọc Trọng</p>
+    <div class="content-wrap">
+        <div class="container-fluid py-4 px-4">
+            <!-- Header với Logo EVN SPC -->
+            <div class="row mb-4">
+                <div class="col-12 bg-white p-4 rounded shadow-sm border-start border-primary border-5">
+                    <div class="d-flex align-items-center">
+                        <!-- Logo EVN SPC -->
+                        <!-- Logo EVN SPC từ thư mục images -->
+                        <div class="me-3">
+                            <img src="{{ url_for('static', filename='images/ten_file_logo.png') }}" alt="EVN Logo" max-height: 80px;="width: 75px; height: 75px; object-fit: contain;">
+                        </div>
+                        <div>
+                            <h3 class="text-primary fw-bold mb-1">⚡ PHẦN MỀM DỰ BÁO ĐIỆN THƯƠNG PHẨM TÍCH HỢP AI</h3>
+                            <h5 class="text-secondary mb-1">CÔNG TY ĐIỆN LỰC TÂY NINH</h5>
+                            <!-- Tên đơn vị được tô màu nổi bật -->
+                            <p class="text-muted mb-0">Đơn vị: <strong id="ten_don_vi_HienThi" class="text-dark">Điện lực Tân Thạnh</strong></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- BẢNG ĐIỀU KHIỂN & NHẬP LIỆU -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3">📊 BẢNG ĐIỀU KHIỂN & NHẬP LIỆU THỦ CÔNG</div>
-            <div class="card-body">
-                <form id="predictionForm">
-                    <div class="row">
-                        <!-- Cột 1: Thời gian & Môi trường -->
-                        <div class="col-lg-4 border-end pe-4">
-                            <h6 class="text-primary fw-bold section-title">1. Thời gian & Môi trường</h6>
-                            <div class="row mb-2">
-                                <div class="col-6"><label class="form-label text-muted mb-1">Tháng</label><input type="number" id="thang" class="form-control" value="8" required></div>
-                                <div class="col-6"><label class="form-label text-muted mb-1">Năm</label><input type="number" id="nam" class="form-control" value="2026" required></div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-6"><label class="form-label text-muted mb-1">Nhiệt độ (°C)</label><input type="number" id="nhiet_do" step="0.1" class="form-control" value="34" required></div>
-                                <div class="col-6"><label class="form-label text-muted mb-1">Độ ẩm (%)</label><input type="number" id="do_am" class="form-control" value="80" required></div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted mb-1">Dự báo Bão (Số ngày)</label>
-                                <input type="number" id="so_ngay_bao" class="form-control" value="0" min="0" max="31" required>
-                            </div>
-                        </div>
-
-                        <!-- Cột 2: Kinh tế & Xã hội -->
-                        <div class="col-lg-4 border-end pe-4 ps-4">
-                            <h6 class="text-primary fw-bold section-title">2. Kinh tế & Xã hội</h6>
-                            <div class="mb-3">
-                                <label class="form-label text-muted mb-1 fw-bold text-dark">Đơn vị Điện lực</label>
-                                <select id="dien_luc" class="form-select bg-light border-primary fw-bold text-primary" onchange="capNhatKinhTe()">
-                                    <option value="TanThanh">Điện lực Tân Thạnh</option>
-                                    <option value="TamVu">Điện lực Tầm Vu</option>
-                                    <option value="TanTru">Điện lực Tân Trụ</option>
-                                    <option value="ThuThua">Điện lực Thủ Thừa</option>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
-                                <input type="number" id="mat_do" class="form-control" value="500" required>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-7"><label class="form-label text-muted mb-1">Khách hàng</label><input type="number" id="khach_hang" class="form-control" value="15000" required></div>
-                                <div class="col-5"><label class="form-label text-muted mb-1">Tốc độ PT(%)</label><input type="number" id="toc_do" step="0.1" class="form-control" value="2.5" required></div>
-                            </div>
-                        </div>
-
-                        <!-- Cột 3: Phụ tải cấu thành -->
-                        <div class="col-lg-4 ps-4">
-                            <h6 class="text-primary fw-bold section-title">3. Phụ tải cấu thành (kWh)</h6>
-                            <div class="mb-2"><input type="number" id="pt1" class="form-control" placeholder="Nông lâm thủy sản" value="125000" required></div>
-                            <div class="mb-2"><input type="number" id="pt2" class="form-control" placeholder="Công nghiệp, xây dựng" value="145000" required></div>
-                            <div class="mb-2"><input type="number" id="pt3" class="form-control" placeholder="Thương mại, dịch vụ" value="210000" required></div>
-                            <div class="mb-2"><input type="number" id="pt4" class="form-control" placeholder="Quản lý, tiêu dùng" value="4800000" required></div>
-                            <div class="mb-2"><input type="number" id="pt5" class="form-control" placeholder="Hoạt động khác" value="390000" required></div>
-                        </div>
-                    </div>
-
-                    <!-- Cột 4: Lịch công tác & Ngày nghỉ -->
-                    <div class="row mt-4 px-2">
-                        <div class="col-12">
-                            <h6 class="text-primary fw-bold section-title">4. Thông tin Lịch công tác & Ngày nghỉ (Ảnh hưởng Phụ tải)</h6>
-                            <div class="row bg-light p-3 rounded border">
-                                <div class="col-md-3 mb-2">
-                                    <label class="form-label text-muted mb-1">Cúp điện trong tuần (ngày)</label>
-                                    <input type="number" id="cup_dien_tuan" class="form-control border-danger" value="0" required>
+            <!-- BẢNG ĐIỀU KHIỂN & NHẬP LIỆU -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">📊 BẢNG ĐIỀU KHIỂN & NHẬP LIỆU THỦ CÔNG</div>
+                <div class="card-body">
+                    <form id="predictionForm">
+                        <div class="row">
+                            <!-- Cột 1: Thời gian & Môi trường -->
+                            <div class="col-lg-4 border-end pe-4">
+                                <h6 class="text-primary fw-bold section-title">1. Thời gian & Môi trường</h6>
+                                <div class="row mb-2">
+                                    <div class="col-6"><label class="form-label text-muted mb-1">Tháng</label><input type="number" id="thang" class="form-control" value="8" required></div>
+                                    <div class="col-6"><label class="form-label text-muted mb-1">Năm</label><input type="number" id="nam" class="form-control" value="2026" required></div>
                                 </div>
-                                <div class="col-md-3 mb-2">
-                                    <label class="form-label text-muted mb-1">Cúp điện T7-CN (ngày)</label>
-                                    <input type="number" id="cup_dien_cuoi_tuan" class="form-control border-warning" value="0" required>
+                                <div class="row mb-2">
+                                    <div class="col-6"><label class="form-label text-muted mb-1">Nhiệt độ (°C)</label><input type="number" id="nhiet_do" step="0.1" class="form-control" value="34" required></div>
+                                    <div class="col-6"><label class="form-label text-muted mb-1">Độ ẩm (%)</label><input type="number" id="do_am" class="form-control" value="80" required></div>
                                 </div>
-                                <div class="col-md-3 mb-2">
-                                    <label class="form-label text-muted mb-1">Số ngày Lễ trong tháng</label>
-                                    <input type="number" id="ngay_le" class="form-control border-success" value="0" required>
-                                </div>
-                                <div class="col-md-3 mb-2">
-                                    <label class="form-label text-muted mb-1">Tổng T7 & CN (ngày)</label>
-                                    <input type="number" id="ngay_nghi" class="form-control border-info" value="8" required>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted mb-1">Dự báo Bão (Số ngày)</label>
+                                    <input type="number" id="so_ngay_bao" class="form-control" value="0" min="0" max="31" required>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Nút bấm và Kết quả -->
-                    <div class="row mt-4 align-items-center">
-                        <div class="col-md-6">
-                            <button type="button" onclick="thucHienDuBao()" class="btn btn-primary btn-lg px-4 fw-bold shadow">
-                                🔍 DỰ BÁO NHANH
-                            </button>
+                            <!-- Cột 2: Kinh tế & Xã hội -->
+                            <div class="col-lg-4 border-end pe-4 ps-4">
+                                <h6 class="text-primary fw-bold section-title">2. Kinh tế & Xã hội</h6>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted mb-1 fw-bold text-dark">Đơn vị Điện lực</label>
+                                    <select id="dien_luc" class="form-select bg-light border-primary fw-bold text-primary" onchange="capNhatKinhTe()">
+                                        <option value="Điện lực Tân Thạnh">Điện lực Tân Thạnh</option>
+                                        <option value="Điện lực Tầm Vu">Điện lực Tầm Vu</option>
+                                        <option value="Điện lực Tân Trụ">Điện lực Tân Trụ</option>
+                                        <option value="Điện lực Thủ Thừa">Điện lực Thủ Thừa</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
+                                    <input type="number" id="mat_do" class="form-control" value="500" required>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-7"><label class="form-label text-muted mb-1">Khách hàng</label><input type="number" id="khach_hang" class="form-control" value="15000" required></div>
+                                    <div class="col-5"><label class="form-label text-muted mb-1">Tốc độ PT(%)</label><input type="number" id="toc_do" step="0.1" class="form-control" value="2.5" required></div>
+                                </div>
+                            </div>
+
+                            <!-- Cột 3: Phụ tải cấu thành -->
+                            <div class="col-lg-4 ps-4">
+                                <h6 class="text-primary fw-bold section-title">3. Phụ tải cấu thành (kWh)</h6>
+                                <div class="mb-2"><input type="number" id="pt1" class="form-control" placeholder="Nông lâm thủy sản" value="125000" required></div>
+                                <div class="mb-2"><input type="number" id="pt2" class="form-control" placeholder="Công nghiệp, xây dựng" value="145000" required></div>
+                                <div class="mb-2"><input type="number" id="pt3" class="form-control" placeholder="Thương mại, dịch vụ" value="210000" required></div>
+                                <div class="mb-2"><input type="number" id="pt4" class="form-control" placeholder="Quản lý, tiêu dùng" value="4800000" required></div>
+                                <div class="mb-2"><input type="number" id="pt5" class="form-control" placeholder="Hoạt động khác" value="390000" required></div>
+                            </div>
                         </div>
-                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                            <span class="text-secondary fw-bold me-2">KẾT QUẢ AI XGBOOST:</span>
-                            <span id="ket_qua" class="result-box">0.00 kWh</span>
+
+                        <!-- Cột 4: Lịch công tác & Ngày nghỉ -->
+                        <div class="row mt-4 px-2">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold section-title">4. Thông tin Lịch công tác & Ngày nghỉ (Ảnh hưởng Phụ tải)</h6>
+                                <div class="row bg-light p-3 rounded border">
+                                    <div class="col-md-3 mb-2">
+                                        <label class="form-label text-muted mb-1">Cúp điện trong tuần (ngày)</label>
+                                        <input type="number" id="cup_dien_tuan" class="form-control border-danger" value="0" required>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label class="form-label text-muted mb-1">Cúp điện T7-CN (ngày)</label>
+                                        <input type="number" id="cup_dien_cuoi_tuan" class="form-control border-warning" value="0" required>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label class="form-label text-muted mb-1">Số ngày Lễ trong tháng</label>
+                                        <input type="number" id="ngay_le" class="form-control border-success" value="0" required>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label class="form-label text-muted mb-1">Tổng T7 & CN (ngày)</label>
+                                        <input type="number" id="ngay_nghi" class="form-control border-info" value="8" required>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </form>
+
+                        <!-- Nút bấm và Kết quả -->
+                        <div class="row mt-4 align-items-center">
+                            <div class="col-md-6">
+                                <button type="button" onclick="thucHienDuBao()" class="btn btn-primary btn-lg px-4 fw-bold shadow">
+                                    🔍 DỰ BÁO NHANH
+                                </button>
+                            </div>
+                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                                <span class="text-secondary fw-bold me-2">KẾT QUẢ AI XGBOOST:</span>
+                                <span id="ket_qua" class="result-box">0.00 kWh</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- PHÂN TÍCH ĐA THUẬT TOÁN HÀNG LOẠT -->
-        <div class="card shadow-sm">
-            <div class="card-header py-3">📁 PHÂN TÍCH ĐA THUẬT TOÁN HÀNG LOẠT (EXCEL)</div>
-            <div class="card-body">
-                <form id="uploadForm" class="row align-items-center g-3">
-                    <div class="col-md-5">
-                        <input type="file" id="excelFile" class="form-control" accept=".xlsx" required>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="button" onclick="chayPhanTichExcel()" class="btn btn-dark fw-bold">🚀 CHẠY PHÂN TÍCH</button>
-                    </div>
-                    <div class="col-md-3 text-md-end">
-                        <a href="/download_template" class="btn btn-outline-success fw-bold">📥 TẢI FILE EXCEL MẪU</a>
-                    </div>
-                </form>
-                <div id="excelResult" class="table-responsive mt-4"></div>
+            <!-- PHÂN TÍCH ĐA THUẬT TOÁN HÀNG LOẠT -->
+            <div class="card shadow-sm">
+                <div class="card-header py-3">📁 PHÂN TÍCH ĐA THUẬT TOÁN HÀNG LOẠT (EXCEL)</div>
+                <div class="card-body">
+                    <form id="uploadForm" class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <input type="file" id="excelFile" class="form-control" accept=".xlsx" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" onclick="chayPhanTichExcel()" class="btn btn-dark fw-bold">🚀 CHẠY PHÂN TÍCH</button>
+                        </div>
+                        <div class="col-md-3 text-md-end">
+                            <a href="/download_template" class="btn btn-outline-success fw-bold">📥 TẢI FILE EXCEL MẪU</a>
+                        </div>
+                    </form>
+                    <div id="excelResult" class="table-responsive mt-4"></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Tên tác giả mờ ở cuối trang -->
+    <footer class="footer-author">
+        Phần mềm được phát triển bởi tác giả <strong>Huỳnh Ngọc Trọng</strong> &copy; 2026 - Công ty Điện lực Tây Ninh
+    </footer>
+
     <!-- JavaScript Xử lý tương tác -->
     <script>
-        // Dữ liệu mẫu tự động điền theo Điện lực
         const dataKinhTe = {
-            "TanThanh": { mat_do: 500, toc_do: 2.5, khach_hang: 15000 },
-            "TamVu":    { mat_do: 850, toc_do: 3.2, khach_hang: 22000 },
-            "TanTru":   { mat_do: 780, toc_do: 2.8, khach_hang: 18500 },
-            "ThuThua":  { mat_do: 650, toc_do: 3.5, khach_hang: 19000 }
+            "Điện lực Tân Thạnh": { mat_do: 500, toc_do: 2.5, khach_hang: 15000 },
+            "Điện lực Tầm Vu":    { mat_do: 850, toc_do: 3.2, khach_hang: 22000 },
+            "Điện lực Tân Trụ":   { mat_do: 780, toc_do: 2.8, khach_hang: 18500 },
+            "Điện lực Thủ Thừa":  { mat_do: 650, toc_do: 3.5, khach_hang: 19000 }
         };
 
         function capNhatKinhTe() {
-            let khuVuc = document.getElementById("dien_luc").value;
+            let selectBox = document.getElementById("dien_luc");
+            let khuVuc = selectBox.value;
+            
+            // Cập nhật tên đơn vị nổi bật ở tiêu đề đầu trang
+            document.getElementById("ten_don_vi_HienThi").innerText = khuVuc;
+
             if(dataKinhTe[khuVuc]) {
                 document.getElementById("mat_do").value = dataKinhTe[khuVuc].mat_do;
                 document.getElementById("toc_do").value = dataKinhTe[khuVuc].toc_do;
@@ -164,7 +187,6 @@
             capNhatKinhTe();
         });
 
-        // Hàm Dự Báo Nhanh
         function thucHienDuBao() {
             let ketQuaBox = document.getElementById('ket_qua');
             ketQuaBox.innerText = "⏳ Đang tính...";
@@ -209,7 +231,6 @@
             });
         }
 
-        // Hàm Phân Tích Excel Hàng Loạt
         function chayPhanTichExcel() {
             let fileInput = document.getElementById('excelFile');
             if(fileInput.files.length === 0) {
