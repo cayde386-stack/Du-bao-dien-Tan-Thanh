@@ -190,12 +190,27 @@
         fetch('/predict', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(getFormData())
-        }).then(res => res.json()).then(data => {
-            if(data.status === 'success') resultText.innerText = data.result + " kWh";
-            else resultText.innerHTML = '<span class="text-danger fs-5">Lỗi Mô Hình!</span>';
-        }).catch(() => resultText.innerHTML = '<span class="text-danger fs-5">Lỗi Kết Nối!</span>');
-    });
-
+ function getFormData() {
+        return {
+            thang: document.getElementById('thang').value, 
+            nam: document.getElementById('nam').value,
+            nhiet_do: document.getElementById('nhiet_do').value, 
+            do_am: document.getElementById('do_am').value,
+            mat_do: document.getElementById('mat_do').value, 
+            khach_hang: document.getElementById('khach_hang').value,
+            toc_do: document.getElementById('toc_do').value, 
+            so_ngay_bao: document.getElementById('so_ngay_bao').value,
+            cup_dien_tuan: document.getElementById('cup_dien_tuan').value,
+            cup_dien_cuoi_tuan: document.getElementById('cup_dien_cuoi_tuan').value,
+            ngay_le: document.getElementById('ngay_le').value,
+            ngay_nghi: document.getElementById('ngay_nghi').value,
+            pt1: document.getElementById('pt1').value, 
+            pt2: document.getElementById('pt2').value,
+            pt3: document.getElementById('pt3').value, 
+            pt4: document.getElementById('pt4').value, 
+            pt5: document.getElementById('pt5').value
+        };
+    }
     // Xử lý tải File Excel
     document.getElementById('excel-form').addEventListener('submit', function(e) {
         e.preventDefault();
