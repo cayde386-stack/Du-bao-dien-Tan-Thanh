@@ -86,7 +86,28 @@
                 </div>
 
                 <hr class="my-4">
-
+<!-- Cột 4: Lịch Công Tác (Trải dài ngang form) -->
+                <div class="col-12 mt-4 px-3">
+                    <h6 class="text-primary fw-bold section-title">4. Thông tin Lịch công tác & Ngày nghỉ (Ảnh hưởng Phụ tải)</h6>
+                    <div class="row bg-light p-3 rounded border">
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label text-muted mb-1">Cúp điện trong tuần (ngày)</label>
+                            <input type="number" id="cup_dien_tuan" class="form-control border-danger" value="0" required>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label text-muted mb-1">Cúp điện T7-CN (ngày)</label>
+                            <input type="number" id="cup_dien_cuoi_tuan" class="form-control border-warning" value="0" required>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label text-muted mb-1">Số ngày Lễ trong tháng</label>
+                            <input type="number" id="ngay_le" class="form-control border-success" value="0" required>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label text-muted mb-1">Tổng T7 & CN (ngày)</label>
+                            <input type="number" id="ngay_nghi" class="form-control border-info" value="8" required>
+                        </div>
+                    </div>
+                </div>
                 <!-- Khu vực Nút bấm & Hiển thị Kết quả -->
                 <div class="row align-items-center bg-light p-3 rounded">
                     <div class="col-md-7">
@@ -134,12 +155,16 @@
 </div>
 
 <script>
-    function getFormData() {
+ function getFormData() {
         return {
             thang: document.getElementById('thang').value, nam: document.getElementById('nam').value,
             nhiet_do: document.getElementById('nhiet_do').value, do_am: document.getElementById('do_am').value,
             mat_do: document.getElementById('mat_do').value, khach_hang: document.getElementById('khach_hang').value,
-            toc_do: document.getElementById('toc_do').value, bao: document.getElementById('bao').value,
+            toc_do: document.getElementById('toc_do').value, so_ngay_bao: document.getElementById('so_ngay_bao').value,
+            cup_dien_tuan: document.getElementById('cup_dien_tuan').value,
+            cup_dien_cuoi_tuan: document.getElementById('cup_dien_cuoi_tuan').value,
+            ngay_le: document.getElementById('ngay_le').value,
+            ngay_nghi: document.getElementById('ngay_nghi').value,
             pt1: document.getElementById('pt1').value, pt2: document.getElementById('pt2').value,
             pt3: document.getElementById('pt3').value, pt4: document.getElementById('pt4').value, pt5: document.getElementById('pt5').value
         };
