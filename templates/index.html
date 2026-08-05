@@ -19,23 +19,29 @@
     <div class="content-wrap">
         <div class="container-fluid py-4 px-4">
             <!-- Header với Logo EVN SPC -->
-            <div class="row mb-4">
-                <div class="col-12 bg-white p-4 rounded shadow-sm border-start border-primary border-5">
-                    <div class="d-flex align-items-center">
-                        <!-- Logo EVN SPC -->
-                        <!-- Logo EVN SPC từ thư mục images -->
-                        <div class="me-3">
-                            <img src="{{ url_for('static', filename='images/ten_file_logo.png') }}" alt="EVN Logo" max-height: 80px;="width: 75px; height: 75px; object-fit: contain;">
-                        </div>
-                        <div>
-                            <h3 class="text-primary fw-bold mb-1">⚡ PHẦN MỀM DỰ BÁO ĐIỆN THƯƠNG PHẨM TÍCH HỢP AI</h3>
-                            <h5 class="text-primary fw-bold mb-1">CÔNG TY ĐIỆN LỰC TÂY NINH</h5>
-                            <!-- Tên đơn vị được tô màu nổi bật -->
-                            <p class="text-muted mb-0">Đơn vị: <strong id="ten_don_vi_HienThi" class="text-primary fw-bold mb-1">Điện lực Tân Thạnh</strong></p>
-                        </div>
-                    </div>
+          <!-- Header cân đối chuyên nghiệp -->
+<div class="row mb-4">
+    <div class="col-12 bg-white p-4 rounded shadow-sm border-start border-primary border-5">
+        <div class="row align-items-center">
+            <!-- Cột trái: Logo và Tên đơn vị -->
+            <div class="col-lg-7 d-flex align-items-center mb-3 mb-lg-0">
+                <div class="me-3 flex-shrink-0">
+                    <img src="{{ url_for('static', filename='images/ten_file_logo.png') }}" alt="EVN Logo" style="height: 60px; width: auto; object-fit: contain;">
+                </div>
+                <div>
+                    <h5 class="text-primary fw-bold mb-1">CÔNG TY ĐIỆN LỰC TÂY NINH</h5>
+                    <p class="text-muted mb-0">Đơn vị quản lý: <strong id="ten_don_vi_HienThi" class="text-primary fw-bold">Điện lực Tân Thạnh</strong></p>
                 </div>
             </div>
+            <!-- Cột phải: Tiêu đề phần mềm chính -->
+            <div class="col-lg-5 text-lg-end">
+                <h4 class="text-primary fw-bold mb-0" style="font-size: 1.25rem;">
+                    ⚡ PHẦN MỀM DỰ BÁO ĐIỆN THƯƠNG PHẨM TÍCH HỢP AI
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>
 
             <!-- BẢNG ĐIỀU KHIỂN & NHẬP LIỆU -->
             <div class="card shadow-sm mb-4">
