@@ -10,7 +10,7 @@ app = Flask(__name__)
 # Tải mô hình AI
 def load_model():
     try:
-        return joblib.load('xgboost_model_v2.pkl')
+        return joblib.load('xgboost_model.pkl')
     except:
         return None
 
