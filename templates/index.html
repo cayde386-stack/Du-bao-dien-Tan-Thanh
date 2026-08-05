@@ -59,6 +59,29 @@
 
                     <!-- Cột 2: Kinh tế & Xã hội -->
                     <div class="col-lg-4 border-end pe-4 ps-4">
+                       <!-- Cột 2: Kinh tế & Xã hội -->
+                    <div class="col-lg-4 border-end pe-4 ps-4">
+                        <h6 class="text-primary fw-bold section-title">2. KINH TẾ - XÃ HỘI</h6>
+                        
+                        <!-- MỤC CHỌN ĐƠN VỊ ĐIỆN LỰC -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted mb-1 fw-bold text-dark">Đơn vị Điện lực</label>
+                            <select id="dien_luc" class="form-select bg-light border-primary fw-bold text-primary" onchange="capNhatKinhTe()">
+                                <option value="TanThanh">Điện lực Tân Thạnh</option>
+                                <option value="TamVu">Điện lực Tầm Vu</option>
+                                <option value="TanTru">Điện lực Tân Trụ</option>
+                                <option value="ThuThua">Điện lực Thủ Thừa</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
+                            <input type="number" id="mat_do" class="form-control" value="500" required>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-7"><label class="form-label text-muted mb-1">Khách hàng</label><input type="number" id="khach_hang" class="form-control" value="15000" required></div>
+                            <div class="col-5"><label class="form-label text-muted mb-1">Tốc độ PT(%)</label><input type="number" id="toc_do" step="0.1" class="form-control" value="2.5" required></div>
+                        </div>
+                    </div> 
                         <h6 class="text-primary fw-bold section-title">2. Kinh tế - Xã hội</h6>
                         <div class="mb-3">
                             <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
@@ -155,20 +178,29 @@
 </div>
 
 <script>
- function getFormData() {
-        return {
-            thang: document.getElementById('thang').value, nam: document.getElementById('nam').value,
-            nhiet_do: document.getElementById('nhiet_do').value, do_am: document.getElementById('do_am').value,
-            mat_do: document.getElementById('mat_do').value, khach_hang: document.getElementById('khach_hang').value,
-            toc_do: document.getElementById('toc_do').value, so_ngay_bao: document.getElementById('so_ngay_bao').value,
-            cup_dien_tuan: document.getElementById('cup_dien_tuan').value,
-            cup_dien_cuoi_tuan: document.getElementById('cup_dien_cuoi_tuan').value,
-            ngay_le: document.getElementById('ngay_le').value,
-            ngay_nghi: document.getElementById('ngay_nghi').value,
-            pt1: document.getElementById('pt1').value, pt2: document.getElementById('pt2').value,
-            pt3: document.getElementById('pt3').value, pt4: document.getElementById('pt4').value, pt5: document.getElementById('pt5').value
+// Từ điển Dữ liệu Kinh tế Xã hội các khu vực
+    function capNhatKinhTe() {
+        const dataKinhTe = {
+            "TanThanh": { mat_do: 500, toc_do: 2.5, khach_hang: 15000 },
+            "TamVu":    { mat_do: 850, toc_do: 3.2, khach_hang: 22000 }, // Số liệu giả lập
+            "TanTru":   { mat_do: 780, toc_do: 2.8, khach_hang: 18500 }, // Số liệu giả lập
+            "ThuThua":  { mat_do: 650, toc_do: 3.5, khach_hang: 19000 }  // Số liệu giả lập
         };
+        
+        let khuVuc = document.getElementById("dien_luc").value;
+        
+        // Tự động điền số vào các ô trống
+        if(dataKinhTe[khuVuc]) {
+            document.getElementById("mat_do").value = dataKinhTe[khuVuc].mat_do;
+            document.getElementById("toc_do").value = dataKinhTe[khuVuc].toc_do;
+            document.getElementById("khach_hang").value = dataKinhTe[khuVuc].khach_hang;
+        }
     }
+
+    // Tự động chạy hàm cập nhật 1 lần ngay khi vừa mở web lên
+    document.addEventListener("DOMContentLoaded", function() {
+        capNhatKinhTe();
+    });
 
     // Xử lý nút Dự báo thủ công
     document.getElementById('btn-predict-manual').addEventListener('click', function() {
