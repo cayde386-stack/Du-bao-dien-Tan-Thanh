@@ -25,16 +25,52 @@ def predict_manual():
     if model is None: return jsonify({'status': 'error', 'message': 'Lỗi mô hình!'})
     try:
         data = request.json
-        df_manual = pd.DataFrame([{
-            'Thang': float(data['thang']), 'Nam': float(data['nam']),
-            'Nhiet_do': float(data['nhiet_do']), 'Do_am': float(data['do_am']),
-            'Mat_do_dan_so': float(data['mat_do']), 'So_khach_hang': float(data['khach_hang']),
-            'Toc_do_phat_trien': float(data['toc_do']), 'So_ngay_bao': float(data['so_ngay_bao']),
-            'Cup_dien_tuan': float(data['cup_dien_tuan']), 'Cup_dien_cuoi_tuan': float(data['cup_dien_cuoi_tuan']),
-            'Ngay_le': float(data['ngay_le']), 'Ngay_nghi': float(data['ngay_nghi']),
-            'Phu_tai_1': float(data['pt1']), 'Phu_tai_2': float(data['pt2']),
-            'Phu_tai_3': float(data['pt3']), 'Phu_tai_4': float(data['pt4']), 'Phu_tai_5': float(data['pt5'])
-        }])
+    
+    # Xử lý tự động các giá trị nếu bỏ trống (tránh lỗi khi không nhập dữ liệu lịch sử)
+    thang_val = float(data.get('thang', 7))
+    thang_nang_nong = 1 if (3 <= thang_val <= 5) else 0
+    thang_mua = 1 if (5 <= thang_val <= 11) else 0
+    thang_bao = float(data.get('so_ngay_bao') or 0)
+    
+    pt1 = float(data.get('pt1', 0))
+    pt2 = float(data.get('pt2', 0))
+    pt3 = float(data.get('pt3', 0))
+    pt4 = float(data.get('pt4', 0))
+    pt5 = float(data.get('pt5', 0))
+    
+    # Nếu không nhập dữ liệu lịch sử thì lấy bằng chính giá trị hiện tại để bỏ qua
+    pt1_ky = float(data.get('pt1_ky_truoc') or pt1)
+    pt2_ky = float(data.get('pt2_ky_truoc') or pt2)
+    pt3_ky = float(data.get('pt3_ky_truoc') or pt3)
+    pt4_ky = float(data.get('pt4_ky_truoc') or pt4)
+    pt5_ky = float(data.get('pt5_ky_truoc') or pt5)
+
+    df_manual = pd.DataFrame([{
+        'Thang': thang_val, 
+        'Nam': float(data.get('nam', 2026)),
+        'Nhiet_do': float(data.get('nhiet_do', 0)), 
+        'Do_am': float(data.get('do_am', 0)),
+        'Mat_do_dan_so': float(data.get('mat_do', 0)), 
+        'So_khach_hang': float(data.get('khach_hang', 0)),
+        'Toc_do_phat_trien': float(data.get('toc_do', 0)), 
+        'Thang_nang_nong': thang_nang_nong,
+        'Thang_mua': thang_mua, 
+        'Thang_bao': thang_bao,
+        'Cup_dien_tuan': float(data.get('cup_dien_tuan', 0)), 
+        'Cup_dien_cuoi_tuan': float(data.get('cup_dien_cuoi_tuan', 0)),
+        'Ngay_le': float(data.get('ngay_le', 0)), 
+        'Ngay_nghi': float(data.get('ngay_nghi', 8)),
+        'Phu_tai_1': pt1, 
+        'Phu_tai_2': pt2,
+        'Phu_tai_3': pt3, 
+        'Phu_tai_4': pt4, 
+        'Phu_tai_5': pt5,
+        'Pt1_ky_truoc': pt1_ky, 
+        'Pt2_ky_truoc': pt2_ky,
+        'Pt3_ky_truoc': pt3_ky, 
+        'Pt4_ky_truoc': pt4_ky, 
+        'Pt5_ky_truoc': pt5_ky
+    }])
         prediction = model.predict(df_manual)[0]
         return jsonify({'status': 'success', 'result': "{:,.2f}".format(prediction)})
     except Exception as e:
