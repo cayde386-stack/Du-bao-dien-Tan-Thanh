@@ -18,34 +18,31 @@
 <body>
     <div class="content-wrap">
         <div class="container-fluid py-4 px-4">
-            <!-- Header với Logo EVN SPC -->
-          <!-- Header cân đối chuyên nghiệp -->
-<div class="row mb-4">
-    <div class="col-12 bg-white p-4 rounded shadow-sm border-start border-primary border-5">
-        <div class="row align-items-center">
-            <!-- Cột trái: Logo và Tên đơn vị -->
-            <div class="col-lg-7 d-flex align-items-center mb-3 mb-lg-0">
-                <div class="me-3 flex-shrink-0">
-                    <img src="{{ url_for('static', filename='images/ten_file_logo.png') }}" alt="EVN Logo" style="height: 60px; width: auto; object-fit: contain;">
-                </div>
-                <div>
-                    <h5 class="text-primary fw-bold mb-1">CÔNG TY ĐIỆN LỰC TÂY NINH</h5>
-                    <p class="text-muted mb-0">Đơn vị quản lý: <strong id="ten_don_vi_HienThi" class="text-primary fw-bold">Điện lực Tân Thạnh</strong></p>
+            <!-- Header cân đối chuyên nghiệp -->
+            <div class="row mb-4">
+                <div class="col-12 bg-white p-4 rounded shadow-sm border-start border-primary border-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-7 d-flex align-items-center mb-3 mb-lg-0">
+                            <div class="me-3 flex-shrink-0">
+                                <img src="{{ url_for('static', filename='images/ten_file_logo.png') }}" alt="EVN Logo" style="height: 60px; width: auto; object-fit: contain;">
+                            </div>
+                            <div>
+                                <h5 class="text-primary fw-bold mb-1">CÔNG TY ĐIỆN LỰC TÂY NINH</h5>
+                                <p class="text-muted mb-0">Đơn vị quản lý: <strong id="ten_don_vi_HienThi" class="text-primary fw-bold">Điện lực Tân Thạnh</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 text-lg-end">
+                            <h4 class="text-primary fw-bold mb-0" style="font-size: 1.25rem;">
+                                ⚡ PHẦN MỀM DỰ BÁO ĐIỆN THƯƠNG PHẨM TÍCH HỢP AI
+                            </h4>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- Cột phải: Tiêu đề phần mềm chính -->
-            <div class="col-lg-5 text-lg-end">
-                <h4 class="text-primary fw-bold mb-0" style="font-size: 1.25rem;">
-                    ⚡ PHẦN MỀM DỰ BÁO ĐIỆN THƯƠNG PHẨM TÍCH HỢP AI
-                </h4>
-            </div>
-        </div>
-    </div>
-</div>
 
             <!-- BẢNG ĐIỀU KHIỂN & NHẬP LIỆU -->
             <div class="card shadow-sm mb-4">
-                <div class="card-header py-3">📊 BẢNG NHẬP LIỆU THỦ CÔNG</div>
+                <div class="card-header py-3">📊 BẢNG ĐIỀU KHIỂN & NHẬP LIỆU THỦ CÔNG</div>
                 <div class="card-body">
                     <form id="predictionForm">
                         <div class="row">
@@ -53,16 +50,16 @@
                             <div class="col-lg-4 border-end pe-4">
                                 <h6 class="text-primary fw-bold section-title">1. Thời gian & Môi trường</h6>
                                 <div class="row mb-2">
-                                    <div class="col-6"><label class="form-label text-muted mb-1">Tháng</label><input type="number" id="thang" class="form-control" value="8" required></div>
+                                    <div class="col-6"><label class="form-label text-muted mb-1">Tháng</label><input type="number" id="thang" class="form-control" value="7" required></div>
                                     <div class="col-6"><label class="form-label text-muted mb-1">Năm</label><input type="number" id="nam" class="form-control" value="2026" required></div>
                                 </div>
                                 <div class="row mb-2">
-                                    <div class="col-6"><label class="form-label text-muted mb-1">Nhiệt độ (°C)</label><input type="number" id="nhiet_do" step="0.1" class="form-control" value="34" required></div>
-                                    <div class="col-6"><label class="form-label text-muted mb-1">Độ ẩm (%)</label><input type="number" id="do_am" class="form-control" value="80" required></div>
+                                    <div class="col-6"><label class="form-label text-muted mb-1">Nhiệt độ (°C)</label><input type="number" id="nhiet_do" step="0.1" class="form-control" value="40" required></div>
+                                    <div class="col-6"><label class="form-label text-muted mb-1">Độ ẩm (%)</label><input type="number" id="do_am" class="form-control" value="30" required></div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label text-muted mb-1">Dự báo Bão (Số ngày)</label>
-                                    <input type="number" id="so_ngay_bao" class="form-control" value="0" min="0" max="31" required>
+                                    <input type="number" id="so_ngay_bao" class="form-control" value="2" min="0" max="31" required>
                                 </div>
                             </div>
 
@@ -80,22 +77,41 @@
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label text-muted mb-1">Mật độ Dân số (người/km²)</label>
-                                    <input type="number" id="mat_do" class="form-control" value="500" required>
+                                    <input type="number" id="mat_do" class="form-control" value="200" required>
                                 </div>
                                 <div class="row mb-2">
-                                    <div class="col-7"><label class="form-label text-muted mb-1">Khách hàng</label><input type="number" id="khach_hang" class="form-control" value="15000" required></div>
-                                    <div class="col-5"><label class="form-label text-muted mb-1">Tốc độ PT(%)</label><input type="number" id="toc_do" step="0.1" class="form-control" value="2.5" required></div>
+                                    <div class="col-7"><label class="form-label text-muted mb-1">Khách hàng</label><input type="number" id="khach_hang" class="form-control" value="26623" required></div>
+                                    <div class="col-5"><label class="form-label text-muted mb-1">Tốc độ PT(%)</label><input type="number" id="toc_do" step="0.1" class="form-control" value="0.8" required></div>
                                 </div>
                             </div>
 
-                            <!-- Cột 3: Phụ tải cấu thành -->
+                            <!-- Cột 3: Phụ tải cấu thành (Dự báo & Cùng kỳ năm trước) -->
                             <div class="col-lg-4 ps-4">
                                 <h6 class="text-primary fw-bold section-title">3. Phụ tải cấu thành (kWh)</h6>
-                                <div class="mb-2"><input type="number" id="pt1" class="form-control" placeholder="Nông lâm thủy sản" value="125000" required></div>
-                                <div class="mb-2"><input type="number" id="pt2" class="form-control" placeholder="Công nghiệp, xây dựng" value="145000" required></div>
-                                <div class="mb-2"><input type="number" id="pt3" class="form-control" placeholder="Thương mại, dịch vụ" value="210000" required></div>
-                                <div class="mb-2"><input type="number" id="pt4" class="form-control" placeholder="Quản lý, tiêu dùng" value="4800000" required></div>
-                                <div class="mb-2"><input type="number" id="pt5" class="form-control" placeholder="Hoạt động khác" value="390000" required></div>
+                                <div class="row text-muted small mb-1 fw-bold">
+                                    <div class="col-6">Dự báo tháng tới</div>
+                                    <div class="col-6">Cùng kỳ năm trước</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><input type="number" id="pt1" class="form-control" value="1450000" required></div>
+                                    <div class="col-6"><input type="number" id="pt1_ky_truoc" class="form-control bg-light" value="1400000" required></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><input type="number" id="pt2" class="form-control" value="1350000" required></div>
+                                    <div class="col-6"><input type="number" id="pt2_ky_truoc" class="form-control bg-light" value="1300000" required></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><input type="number" id="pt3" class="form-control" value="350000" required></div>
+                                    <div class="col-6"><input type="number" id="pt3_ky_truoc" class="form-control bg-light" value="340000" required></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><input type="number" id="pt4" class="form-control" value="5250000" required></div>
+                                    <div class="col-6"><input type="number" id="pt4_ky_truoc" class="form-control bg-light" value="5100000" required></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><input type="number" id="pt5" class="form-control" value="400000" required></div>
+                                    <div class="col-6"><input type="number" id="pt5_ky_truoc" class="form-control bg-light" value="390000" required></div>
+                                </div>
                             </div>
                         </div>
 
@@ -169,7 +185,7 @@
     <!-- JavaScript Xử lý tương tác -->
     <script>
         const dataKinhTe = {
-            "Điện lực Tân Thạnh": { mat_do: 500, toc_do: 2.5, khach_hang: 15000 },
+            "Điện lực Tân Thạnh": { mat_do: 200, toc_do: 0.8, khach_hang: 26623 },
             "Điện lực Tầm Vu":    { mat_do: 850, toc_do: 3.2, khach_hang: 22000 },
             "Điện lực Tân Trụ":   { mat_do: 780, toc_do: 2.8, khach_hang: 18500 },
             "Điện lực Thủ Thừa":  { mat_do: 650, toc_do: 3.5, khach_hang: 19000 }
@@ -178,8 +194,6 @@
         function capNhatKinhTe() {
             let selectBox = document.getElementById("dien_luc");
             let khuVuc = selectBox.value;
-            
-            // Cập nhật tên đơn vị nổi bật ở tiêu đề đầu trang
             document.getElementById("ten_don_vi_HienThi").innerText = khuVuc;
 
             if(dataKinhTe[khuVuc]) {
@@ -193,28 +207,52 @@
             capNhatKinhTe();
         });
 
-        function thucHienDuBao() {
+function thucHienDuBao() {
             let ketQuaBox = document.getElementById('ket_qua');
             ketQuaBox.innerText = "⏳ Đang tính...";
 
+            let pt1 = document.getElementById('pt1').value || 0;
+            let pt2 = document.getElementById('pt2').value || 0;
+            let pt3 = document.getElementById('pt3').value || 0;
+            let pt4 = document.getElementById('pt4').value || 0;
+            let pt5 = document.getElementById('pt5').value || 0;
+
+            let pt1_ky = document.getElementById('pt1_ky_truoc').value;
+            let pt2_ky = document.getElementById('pt2_ky_truoc').value;
+            let pt3_ky = document.getElementById('pt3_ky_truoc').value;
+            let pt4_ky = document.getElementById('pt4_ky_truoc').value;
+            let pt5_ky = document.getElementById('pt5_ky_truoc').value;
+
+            let thangVal = parseFloat(document.getElementById('thang').value) || 7;
+            let thang_nang_nong = (thangVal >= 3 && thangVal <= 5) ? 1 : 0;
+            let thang_mua = (thangVal >= 5 && thangVal <= 11) ? 1 : 0;
+
             let payload = {
-                thang: document.getElementById('thang').value,
+                thang: thangVal,
                 nam: document.getElementById('nam').value,
                 nhiet_do: document.getElementById('nhiet_do').value,
                 do_am: document.getElementById('do_am').value,
                 mat_do: document.getElementById('mat_do').value,
                 khach_hang: document.getElementById('khach_hang').value,
                 toc_do: document.getElementById('toc_do').value,
+                thang_nang_nong: thang_nang_nong,
+                thang_mua: thang_mua,
+                // Giữ nguyên khóa truyền lên là so_ngay_bao khớp với app.py
                 so_ngay_bao: document.getElementById('so_ngay_bao').value,
                 cup_dien_tuan: document.getElementById('cup_dien_tuan').value,
                 cup_dien_cuoi_tuan: document.getElementById('cup_dien_cuoi_tuan').value,
                 ngay_le: document.getElementById('ngay_le').value,
                 ngay_nghi: document.getElementById('ngay_nghi').value,
-                pt1: document.getElementById('pt1').value,
-                pt2: document.getElementById('pt2').value,
-                pt3: document.getElementById('pt3').value,
-                pt4: document.getElementById('pt4').value,
-                pt5: document.getElementById('pt5').value
+                pt1: pt1,
+                pt2: pt2,
+                pt3: pt3,
+                pt4: pt4,
+                pt5: pt5,
+                pt1_ky_truoc: pt1_ky !== "" ? pt1_ky : pt1,
+                pt2_ky_truoc: pt2_ky !== "" ? pt2_ky : pt2,
+                pt3_ky_truoc: pt3_ky !== "" ? pt3_ky : pt3,
+                pt4_ky_truoc: pt4_ky !== "" ? pt4_ky : pt4,
+                pt5_ky_truoc: pt5_ky !== "" ? pt5_ky : pt5
             };
 
             fetch('/predict', {
