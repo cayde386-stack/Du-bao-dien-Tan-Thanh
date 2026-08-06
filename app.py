@@ -77,21 +77,42 @@ def predict():
         
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
+
+
 @app.route('/download_template')
 def download_template():
-    columns = [
-        'STT', 'Thang', 'Nam', 'Nhiet_do', 'Do_am', 'Mat_do_dan_so', 
-        'So_khach_hang', 'Toc_do_phat_trien', 'So_ngay_bao',
-        'Cup_dien_tuan', 'Cup_dien_cuoi_tuan', 'Ngay_le', 'Ngay_nghi',
-        'Phu_tai_1', 'Phu_tai_2', 'Phu_tai_3', 'Phu_tai_4', 'Phu_tai_5'
-    ]
-    df = pd.DataFrame(columns=columns)
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Du_lieu_nhap')
-    output.seek(0)
-    return send_file(output, download_name="File_Mau_Du_Bao.xlsx", as_attachment=True)
-
+    # Tạo DataFrame với đầy đủ các cột chuẩn hóa khớp với mô hình AI 24 biến
+    df_template = pd.DataFrame({
+        'STT': [1, 2],
+        'Thang': [7, 8],
+        'Nam': [2026, 2026],
+        'Nhiet_do': [40.0, 38.5],
+        'Do_am': [30.0, 35.0],
+        'Mat_do_dan_so': [200, 200],
+        'So_khach_hang': [26623, 26623],
+        'Toc_do_phat_trien': [0.8, 0.8],
+        'Thang_nang_nong': [0, 0],
+        'Thang_mua': [1, 1],
+        'Thang_bao': [2, 1],
+        'Cup_dien_tuan': [0, 1],
+        'Cup_dien_cuoi_tuan': [0, 0],
+        'Ngay_le': [0, 0],
+        'Ngay_nghi': [8, 9],
+        'Phu_tai_1': [1450000, 1500000],
+        'Phu_tai_2': [1350000, 1400000],
+        'Phu_tai_3': [350000, 360000],
+        'Phu_tai_4': [5250000, 5300000],
+        'Phu_tai_5': [400000, 410000],
+        'Pt1_ky_truoc': [1400000, 1450000],
+        'Pt2_ky_truoc': [1300000, 1350000],
+        'Pt3_ky_truoc': [340000, 350000],
+        'Pt4_ky_truoc': [5100000, 5200000],
+        'Pt5_ky_truoc': [390000, 400000]
+    })
+    
+    file_path = 'File_Mau_Du_Bao.xlsx'
+    df_template.to_excel(file_path, index=False)
+    return send_file(file_path, as_attachment=True)
 @app.route('/predict_excel', methods=['POST'])
 def predict_excel():
     global model
