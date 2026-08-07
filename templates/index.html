@@ -171,6 +171,14 @@
                             <a href="/download_template" class="btn btn-outline-success fw-bold">📥 TẢI FILE EXCEL MẪU</a>
                         </div>
                     </form>
+
+                    <!-- Nút Tải file kết quả Excel (Mặc định ẩn, hiện ra khi phân tích thành công) -->
+                    <div id="downloadResultContainer" class="text-end mt-3" style="display: none;">
+                        <a href="/download_result_excel" class="btn btn-success fw-bold shadow-sm">
+                            📥 TẢI FILE KẾT QUẢ EXCEL
+                        </a>
+                    </div>
+
                     <div id="excelResult" class="table-responsive mt-4"></div>
                 </div>
             </div>
@@ -207,7 +215,7 @@
             capNhatKinhTe();
         });
 
-function thucHienDuBao() {
+        function thucHienDuBao() {
             let ketQuaBox = document.getElementById('ket_qua');
             ketQuaBox.innerText = "⏳ Đang tính...";
 
@@ -237,7 +245,6 @@ function thucHienDuBao() {
                 toc_do: document.getElementById('toc_do').value,
                 thang_nang_nong: thang_nang_nong,
                 thang_mua: thang_mua,
-                // Giữ nguyên khóa truyền lên là so_ngay_bao khớp với app.py
                 so_ngay_bao: document.getElementById('so_ngay_bao').value,
                 cup_dien_tuan: document.getElementById('cup_dien_tuan').value,
                 cup_dien_cuoi_tuan: document.getElementById('cup_dien_cuoi_tuan').value,
@@ -286,6 +293,10 @@ function thucHienDuBao() {
             formData.append('file', fileInput.files[0]);
 
             let resultDiv = document.getElementById('excelResult');
+            let downloadBtnContainer = document.getElementById('downloadResultContainer');
+            
+            // Ẩn nút tải file cũ đi khi đang chạy phân tích mới
+            downloadBtnContainer.style.display = 'none';
             resultDiv.innerHTML = "<div class='text-center text-primary fw-bold'>⏳ Đang xử lý đa thuật toán hàng loạt...</div>";
 
             fetch('/predict_excel', {
@@ -296,6 +307,8 @@ function thucHienDuBao() {
             .then(data => {
                 if(data.status === 'success') {
                     resultDiv.innerHTML = data.html_table;
+                    // Hiển thị nút tải file kết quả khi thành công
+                    downloadBtnContainer.style.display = 'block';
                 } else {
                     resultDiv.innerHTML = "<div class='alert alert-danger'>Lỗi: " + data.message + "</div>";
                 }
