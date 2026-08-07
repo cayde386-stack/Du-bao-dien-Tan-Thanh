@@ -4,8 +4,12 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 import joblib
 import io
+import os
 
 app = Flask(__name__)
+
+# Biến toàn cục để lưu trữ file kết quả dự báo mới nhất
+latest_result_df = None
 
 def load_model():
     try:
@@ -113,8 +117,11 @@ def download_template():
     file_path = 'File_Mau_Du_Bao.xlsx'
     df_template.to_excel(file_path, index=False)
     return send_file(file_path, as_attachment=True)
+
+
 @app.route('/predict_excel', methods=['POST'])
 def predict_excel():
+    global latest_result_df
     try:
         global model
         file = request.files.get('file')
@@ -178,10 +185,24 @@ def predict_excel():
             row['Ket_qua_du_bao'] = round(float(pred), 2)
             results.append(row)
             
-        df_result = pd.DataFrame(results)
-        html_table = df_result.to_html(classes='table table-striped table-bordered text-center', index=False)
+        latest_result_df = pd.DataFrame(results)
+        html_table = latest_result_df.to_html(classes='table table-striped table-bordered text-center', index=False)
         
         return jsonify({'status': 'success', 'html_table': html_table})
         
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
+
+
+@app.route('/download_result_excel')
+def download_result_excel():
+    global latest_result_df
+    if latest_result_df is not None:
+        file_path = 'Ket_Qua_Du_Bao.xlsx'
+        latest_result_df.to_excel(file_path, index=False)
+        return send_file(file_path, as_attachment=True)
+    return "Chưa có dữ liệu kết quả dự báo!", 400
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
