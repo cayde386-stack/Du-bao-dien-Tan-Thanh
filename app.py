@@ -1,14 +1,11 @@
 from flask import Flask, render_template, request, jsonify, send_file
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
 import joblib
-import io
 import os
 
 app = Flask(__name__)
 
-# Biến toàn cục để lưu trữ file kết quả dự báo mới nhất
 latest_result_df = None
 
 def load_model():
@@ -27,172 +24,209 @@ def home():
 def predict():
     try:
         data = request.json
+        thang_val = float(data.get('thang', 5))
+        nhiet_do = float(data.get('nhiet_do', 39))
+        do_am = float(data.get('do_am', 69))
+        toc_do = float(data.get('toc_do', 9.0))
         
-        # Xử lý an toàn dữ liệu đầu vào và các trường hợp bỏ trống
-        thang_val = float(data.get('thang', 7))
-        thang_nang_nong = 1 if (3 <= thang_val <= 5) else 0
-        thang_mua = 1 if (5 <= thang_val <= 11) else 0
-        thang_bao = float(data.get('so_ngay_bao') or 0)
+        so_ngay_cup_dien = float(data.get('cup_dien_cuoi_tuan') or 2)
+        ngay_le = float(data.get('ngay_le') or 3)
+        ngay_nghi_t7_cn = float(data.get('ngay_nghi') or 10)
         
-        pt1 = float(data.get('pt1', 0))
-        pt2 = float(data.get('pt2', 0))
-        pt3 = float(data.get('pt3', 0))
-        pt4 = float(data.get('pt4', 0))
-        pt5 = float(data.get('pt5', 0))
+        # Hệ số điều chỉnh mùa vụ thực tế theo tháng
+        if thang_val in [3, 4, 5, 6]:
+            he_so_mua_vu = 1.085
+        elif thang_val in [7, 8, 9, 10, 11]:
+            he_so_mua_vu = 1.035
+        else:
+            he_so_mua_vu = 1.050
+            
+        # Lượng hóa ảnh hưởng của nhiệt độ và độ ẩm thực tế
+        yeu_to_thoi_tiet = 1.0 + max(0, (nhiet_do - 35) * 0.006) - max(0, (60 - do_am) * 0.0025)
         
-        # Nếu không nhập dữ liệu lịch sử thì tự lấy bằng chính giá trị hiện tại để bỏ qua
-        pt1_ky = float(data.get('pt1_ky_truoc') or pt1)
-        pt2_ky = float(data.get('pt2_ky_truoc') or pt2)
-        pt3_ky = float(data.get('pt3_ky_truoc') or pt3)
-        pt4_ky = float(data.get('pt4_ky_truoc') or pt4)
-        pt5_ky = float(data.get('pt5_ky_truoc') or pt5)
+        # Hệ số điều chỉnh ngày nghỉ lễ & cuối tuần (Tổng số ngày nghỉ nhiều làm giảm ngày sản xuất kinh doanh)
+        # 1 tháng chuẩn có khoảng 8 ngày nghỉ T7-CN. Nếu tổng (ngay_nghi + ngay_le) vượt mức chuẩn, tính hệ số giảm trừ ngày làm việc.
+        tong_ngay_khong_lam_viec = ngay_nghi_t7_cn + ngay_le
+        he_so_ngay_lam_viec = 1.0 - max(0, (tong_ngay_khong_lam_viec - 8) * 0.012)
+        
+        ty_le_tang = (toc_do / 100.0) * he_so_mua_vu * yeu_to_thoi_tiet * he_so_ngay_lam_viec
+
+        pt1_lk = float(data.get('pt1_lien_ke') or 0)
+        pt1_ky = float(data.get('pt1_ky_truoc') or 0)
+        pt1 = float(data.get('pt1') or (pt1_ky * (1 + ty_le_tang) * 0.5 + pt1_lk * 1.01 * 0.5))
+
+        pt2_lk = float(data.get('pt2_lien_ke') or 0)
+        pt2_ky = float(data.get('pt2_ky_truoc') or 0)
+        pt2 = float(data.get('pt2') or (pt2_ky * (1 + ty_le_tang) * 0.5 + pt2_lk * 1.01 * 0.5))
+
+        pt3_lk = float(data.get('pt3_lien_ke') or 0)
+        pt3_ky = float(data.get('pt3_ky_truoc') or 0)
+        pt3 = float(data.get('pt3') or (pt3_ky * (1 + ty_le_tang) * 0.5 + pt3_lk * 1.01 * 0.5))
+
+        pt4_lk = float(data.get('pt4_lien_ke') or 0)
+        pt4_ky = float(data.get('pt4_ky_truoc') or 0)
+        pt4 = float(data.get('pt4') or (pt4_ky * (1 + ty_le_tang) * 0.5 + pt4_lk * 1.01 * 0.5))
+
+        pt5_lk = float(data.get('pt5_lien_ke') or 0)
+        pt5_ky = float(data.get('pt5_ky_truoc') or 0)
+        pt5 = float(data.get('pt5') or (pt5_ky * (1 + ty_le_tang) * 0.5 + pt5_lk * 1.01 * 0.5))
+
+        giam_tru_cup_dien = so_ngay_cup_dien * 85000
+
+        thang_nang_nong = 1 if (3 <= thang_val <= 6) else 0
+        thang_mua = 1 if (7 <= thang_val <= 11) else 0
 
         df_manual = pd.DataFrame([{
             'Thang': thang_val, 
             'Nam': float(data.get('nam', 2026)),
-            'Nhiet_do': float(data.get('nhiet_do', 0)), 
-            'Do_am': float(data.get('do_am', 0)),
-            'Mat_do_dan_so': float(data.get('mat_do', 0)), 
-            'So_khach_hang': float(data.get('khach_hang', 0)),
-            'Toc_do_phat_trien': float(data.get('toc_do', 0)), 
+            'Nhiet_do': nhiet_do, 
+            'Do_am': do_am,
+            'Mat_do_dan_so': 200, 
+            'So_khach_hang': float(data.get('khach_hang', 26120)),
+            'Toc_do_phat_trien': toc_do, 
             'Thang_nang_nong': thang_nang_nong,
             'Thang_mua': thang_mua, 
-            'Thang_bao': thang_bao,
-            'Cup_dien_tuan': float(data.get('cup_dien_tuan', 0)), 
-            'Cup_dien_cuoi_tuan': float(data.get('cup_dien_cuoi_tuan', 0)),
-            'Ngay_le': float(data.get('ngay_le', 0)), 
-            'Ngay_nghi': float(data.get('ngay_nghi', 8)),
-            'Phu_tai_1': pt1, 
-            'Phu_tai_2': pt2,
-            'Phu_tai_3': pt3, 
-            'Phu_tai_4': pt4, 
-            'Phu_tai_5': pt5,
-            'Pt1_ky_truoc': pt1_ky, 
-            'Pt2_ky_truoc': pt2_ky,
-            'Pt3_ky_truoc': pt3_ky, 
-            'Pt4_ky_truoc': pt4_ky, 
-            'Pt5_ky_truoc': pt5_ky
+            'Thang_bao': 0,
+            'Cup_dien_tuan': 0, 
+            'Cup_dien_cuoi_tuan': so_ngay_cup_dien,
+            'Ngay_le': ngay_le, 
+            'Ngay_nghi': ngay_nghi_t7_cn,
+            'Phu_tai_1': pt1, 'Phu_tai_2': pt2, 'Phu_tai_3': pt3, 'Phu_tai_4': pt4, 'Phu_tai_5': pt5,
+            'Pt1_ky_truoc': pt1_ky, 'Pt2_ky_truoc': pt2_ky, 'Pt3_ky_truoc': pt3_ky, 'Pt4_ky_truoc': pt4_ky, 'Pt5_ky_truoc': pt5_ky
         }])
 
         prediction = model.predict(df_manual)[0]
-        result = round(float(prediction), 2)
+        ket_qua_thuc_te = float(prediction) - giam_tru_cup_dien
+        result = round(max(0, ket_qua_thuc_te), 2)
         
         return jsonify({'status': 'success', 'result': f"{result:,.2f}"})
         
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
 
-
 @app.route('/download_template')
 def download_template():
-    # Tạo DataFrame với đầy đủ các cột chuẩn hóa khớp với mô hình AI 24 biến
     df_template = pd.DataFrame({
-        'STT': [1, 2],
-        'Thang': [7, 8],
-        'Nam': [2026, 2026],
-        'Nhiet_do': [40.0, 38.5],
-        'Do_am': [30.0, 35.0],
-        'Mat_do_dan_so': [200, 200],
-        'So_khach_hang': [26623, 26623],
-        'Toc_do_phat_trien': [0.8, 0.8],
-        'Thang_nang_nong': [0, 0],
-        'Thang_mua': [1, 1],
-        'Thang_bao': [2, 1],
-        'Cup_dien_tuan': [0, 1],
-        'Cup_dien_cuoi_tuan': [0, 0],
-        'Ngay_le': [0, 0],
-        'Ngay_nghi': [8, 9],
-        'Phu_tai_1': [1450000, 1500000],
-        'Phu_tai_2': [1350000, 1400000],
-        'Phu_tai_3': [350000, 360000],
-        'Phu_tai_4': [5250000, 5300000],
-        'Phu_tai_5': [400000, 410000],
-        'Pt1_ky_truoc': [1400000, 1450000],
-        'Pt2_ky_truoc': [1300000, 1350000],
-        'Pt3_ky_truoc': [340000, 350000],
-        'Pt4_ky_truoc': [5100000, 5200000],
-        'Pt5_ky_truoc': [390000, 400000]
+        'STT': [1, 2, 3],
+        'Loai_Ky': ['Cùng kỳ năm trước', 'Tháng liền kề trước', 'Tháng cần dự báo'],
+        'Thang': [5, 3, 5],
+        'Nam': [2025, 2026, 2026],
+        'Nhiet_do': [39, 38, 39],
+        'Do_am': [65, 70, 69],
+        'So_khach_hang': [25288, 25963, 26120],
+        'Ngay_le': [2, 0, 3],
+        'Ngay_nghi': [8, 8, 10],
+        'Cup_dien_cuoi_tuan': [1, 2, 2],
+        'Toc_do_phat_trien': [9, 9, 9],
+        'Nong_lam_nghiep_thuy_san': [1171374, 1663274, None],
+        'Cong_nghiep_Xay_dung': [1253285, 1622186, None],
+        'Thuong_nghiep_khach_san_nhahang': [263268, 283336, None],
+        'Quan_ly_tieu_dung': [5544610, 5548289, None],
+        'Hoat_dong_khac': [441560, 473412, None]
     })
-    
     file_path = 'File_Mau_Du_Bao.xlsx'
     df_template.to_excel(file_path, index=False)
     return send_file(file_path, as_attachment=True)
-
 
 @app.route('/predict_excel', methods=['POST'])
 def predict_excel():
     global latest_result_df
     try:
-        global model
         file = request.files.get('file')
         if not file:
             return jsonify({'status': 'error', 'message': 'Vui lòng chọn file Excel!'})
         
         df = pd.read_excel(file)
-        
         results = []
-        for index, row in df.iterrows():
-            # Đọc các thông số cơ bản, nếu thiếu tự động gán giá trị mặc định an toàn
-            thang_val = float(row.get('Thang', 7))
-            nam_val = float(row.get('Nam', 2026))
-            nhiet_do = float(row.get('Nhiet_do', 35))
-            do_am = float(row.get('Do_am', 70))
-            mat_do = float(row.get('Mat_do_dan_so', 200))
-            khach_hang = float(row.get('So_khach_hang', 26000))
-            toc_do = float(row.get('Toc_do_phat_trien', 0.8))
+        
+        for i in range(0, len(df), 3):
+            group = df.iloc[i:i+3].copy()
+            if len(group) < 3:
+                for idx, row in group.iterrows():
+                    results.append(row)
+                break
+                
+            row_ky = group.iloc[0]
+            row_lienke = group.iloc[1]
+            row_dubao = group.iloc[2]
             
-            thang_nang_nong = 1 if (3 <= thang_val <= 5) else 0
-            thang_mua = 1 if (5 <= thang_val <= 11) else 0
-            thang_bao = float(row.get('Thang_bao', row.get('So_ngay_bao', 0)))
+            thang_val = float(row_dubao.get('Thang', 5))
+            nam_val = float(row_dubao.get('Nam', 2026))
+            nhiet_do = float(row_dubao.get('Nhiet_do', 39))
+            do_am = float(row_dubao.get('Do_am', 69))
+            khach_hang = float(row_dubao.get('So_khach_hang', 26120))
+            toc_do = float(row_dubao.get('Toc_do_phat_trien', 9))
             
-            cup_dien_tuan = float(row.get('Cup_dien_tuan', 0))
-            cup_dien_cuoi_tuan = float(row.get('Cup_dien_cuoi_tuan', 0))
-            ngay_le = float(row.get('Ngay_le', 0))
-            ngay_nghi = float(row.get('Ngay_nghi', 8))
+            so_ngay_cup_dien = float(row_dubao.get('Cup_dien_cuoi_tuan', 2))
+            ngay_le = float(row_dubao.get('Ngay_le', 3))
+            ngay_nghi = float(row_dubao.get('Ngay_nghi', 10))
             
-            # Xử lý phụ tải cấu thành (nếu dòng nào để trống hoặc NaN thì tự động gán bằng 0 hoặc lấy giá trị lịch sử)
-            pt1 = float(row.get('Phu_tai_1', 0) or 0)
-            pt2 = float(row.get('Phu_tai_2', 0) or 0)
-            pt3 = float(row.get('Phu_tai_3', 0) or 0)
-            pt4 = float(row.get('Phu_tai_4', 0) or 0)
-            pt5 = float(row.get('Phu_tai_5', 0) or 0)
+            if thang_val in [3, 4, 5, 6]:
+                he_so_mua_vu = 1.085
+            elif thang_val in [7, 8, 9, 10, 11]:
+                he_so_mua_vu = 1.035
+            else:
+                he_so_mua_vu = 1.050
+                
+            yeu_to_thoi_tiet = 1.0 + max(0, (nhiet_do - 35) * 0.006) - max(0, (60 - do_am) * 0.0025)
+            tong_ngay_khong_lam_viec = ngay_nghi + ngay_le
+            he_so_ngay_lam_viec = 1.0 - max(0, (tong_ngay_khong_lam_viec - 8) * 0.012)
             
-            # Xử lý dữ liệu lịch sử cùng kỳ năm trước (nếu trống thì tự lấy bằng giá trị hiện tại để bỏ qua chênh lệch)
-            pt1_ky = float(row.get('Pt1_ky_truoc', 0) or pt1)
-            pt2_ky = float(row.get('Pt2_ky_truoc', 0) or pt2)
-            pt3_ky = float(row.get('Pt3_ky_truoc', 0) or pt3)
-            pt4_ky = float(row.get('Pt4_ky_truoc', 0) or pt4)
-            pt5_ky = float(row.get('Pt5_ky_truoc', 0) or pt5)
+            ty_le = (toc_do / 100.0) * he_so_mua_vu * yeu_to_thoi_tiet * he_so_ngay_lam_viec
             
-            # Tạo DataFrame 24 biến cho từng dòng
+            cols = ['Nong_lam_nghiep_thuy_san', 'Cong_nghiep_Xay_dung', 'Thuong_nghiep_khach_san_nhahang', 'Quan_ly_tieu_dung', 'Hoat_dong_khac']
+            du_bao_pt = {}
+            
+            for col in cols:
+                val_thuc_te_file = row_dubao.get(col, None)
+                if pd.notna(val_thuc_te_file) and str(val_thuc_te_file).strip() != "" and float(val_thuc_te_file) > 0:
+                    du_bao_pt[col] = float(val_thuc_te_file)
+                else:
+                    val_ky = float(row_ky.get(col, 0) or 0)
+                    val_lienke = float(row_lienke.get(col, 0) or 0)
+                    du_bao_pt[col] = round((val_ky * (1 + ty_le) * 0.5) + (val_lienke * 1.01 * 0.5), 2)
+                row_dubao[col] = du_bao_pt[col]
+
+            thang_nang_nong = 1 if (3 <= thang_val <= 6) else 0
+            thang_mua = 1 if (7 <= thang_val <= 11) else 0
+
             df_row = pd.DataFrame([{
                 'Thang': thang_val, 'Nam': nam_val,
                 'Nhiet_do': nhiet_do, 'Do_am': do_am,
-                'Mat_do_dan_so': mat_do, 'So_khach_hang': khach_hang,
+                'Mat_do_dan_so': 200, 'So_khach_hang': khach_hang,
                 'Toc_do_phat_trien': toc_do, 'Thang_nang_nong': thang_nang_nong,
-                'Thang_mua': thang_mua, 'Thang_bao': thang_bao,
-                'Cup_dien_tuan': cup_dien_tuan, 'Cup_dien_cuoi_tuan': cup_dien_cuoi_tuan,
+                'Thang_mua': thang_mua, 'Thang_bao': 0,
+                'Cup_dien_tuan': 0, 'Cup_dien_cuoi_tuan': so_ngay_cup_dien,
                 'Ngay_le': ngay_le, 'Ngay_nghi': ngay_nghi,
-                'Phu_tai_1': pt1, 'Phu_tai_2': pt2,
-                'Phu_tai_3': pt3, 'Phu_tai_4': pt4, 'Phu_tai_5': pt5,
-                'Pt1_ky_truoc': pt1_ky, 'Pt2_ky_truoc': pt2_ky,
-                'Pt3_ky_truoc': pt3_ky, 'Pt4_ky_truoc': pt4_ky,
-                'Pt5_ky_truoc': pt5_ky
+                'Phu_tai_1': du_bao_pt['Nong_lam_nghiep_thuy_san'], 
+                'Phu_tai_2': du_bao_pt['Cong_nghiep_Xay_dung'], 
+                'Phu_tai_3': du_bao_pt['Thuong_nghiep_khach_san_nhahang'], 
+                'Phu_tai_4': du_bao_pt['Quan_ly_tieu_dung'], 
+                'Phu_tai_5': du_bao_pt['Hoat_dong_khac'],
+                'Pt1_ky_truoc': float(row_ky.get('Nong_lam_nghiep_thuy_san', 0)), 
+                'Pt2_ky_truoc': float(row_ky.get('Cong_nghiep_Xay_dung', 0)), 
+                'Pt3_ky_truoc': float(row_ky.get('Thuong_nghiep_khach_san_nhahang', 0)), 
+                'Pt4_ky_truoc': float(row_ky.get('Quan_ly_tieu_dung', 0)), 
+                'Pt5_ky_truoc': float(row_ky.get('Hoat_dong_khac', 0))
             }])
             
-            # Thực hiện dự báo qua mô hình AI XGBoost
             pred = model.predict(df_row)[0]
-            row['Ket_qua_du_bao'] = round(float(pred), 2)
-            results.append(row)
+            giam_tru_cup_dien = so_ngay_cup_dien * 85000
+            ket_qua_thuc_te = float(pred) - giam_tru_cup_dien
+            
+            row_ky['Ket_qua_du_bao'] = ""
+            row_lienke['Ket_qua_du_bao'] = ""
+            row_dubao['Ket_qua_du_bao'] = round(max(0, ket_qua_thuc_te), 2)
+            
+            results.append(row_ky)
+            results.append(row_lienke)
+            results.append(row_dubao)
             
         latest_result_df = pd.DataFrame(results)
         html_table = latest_result_df.to_html(classes='table table-striped table-bordered text-center', index=False)
-        
         return jsonify({'status': 'success', 'html_table': html_table})
-        
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
-
 
 @app.route('/download_result_excel')
 def download_result_excel():
@@ -202,7 +236,6 @@ def download_result_excel():
         latest_result_df.to_excel(file_path, index=False)
         return send_file(file_path, as_attachment=True)
     return "Chưa có dữ liệu kết quả dự báo!", 400
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
