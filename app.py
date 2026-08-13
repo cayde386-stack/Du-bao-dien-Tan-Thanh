@@ -64,13 +64,10 @@ def predict():
         pt5_lk = float(data.get('pt5_lien_ke') or 490409)
         pt5 = float(data.get('pt5') or (pt5_ky * (1 + ty_le_tang) * 0.5 + pt5_lk * 1.01 * 0.5))
 
-        # Trừ sản lượng tổn thất do cúp điện và do ngày bão
-        giam_tru_cup_dien = so_ngay_cup_dien * 85000
-        giam_tru_bao = so_ngay_bao * 70000
-
         thang_nang_nong = 1 if (3 <= thang_val <= 6) else 0
         thang_mua = 1 if (7 <= thang_val <= 11) else 0
 
+        # Đóng gói toàn bộ biến đặc trưng để mô hình AI tự tính toán nội bộ
         df_manual = pd.DataFrame([{
             'Thang': thang_val, 
             'Nam': float(data.get('nam', 2026)),
@@ -91,8 +88,7 @@ def predict():
         }])
 
         prediction = model.predict(df_manual)[0]
-        ket_qua_thuc_te = float(prediction) - giam_tru_cup_dien - giam_tru_bao
-        result = round(max(0, ket_qua_thuc_te), 2)
+        result = round(float(prediction), 2)
         
         return jsonify({'status': 'success', 'result': f"{result:,.2f}"})
         
@@ -112,6 +108,7 @@ def download_template():
         'Ngay_le': [0, 0, 0],
         'Ngay_nghi': [8, 8, 8],
         'Cup_dien_cuoi_tuan': [1, 2, 2],
+        'Thang_bao': [0, 0, 0],
         'Toc_do_phat_trien': [9, 9, 9],
         'Nong_lam_nghiep_thuy_san': [1091277, 1261088, None],
         'Cong_nghiep_Xay_dung': [1211972, 1670640, None],
@@ -204,13 +201,9 @@ def predict_excel():
             }])
             
             pred = model.predict(df_row)[0]
-            giam_tru_cup_dien = so_ngay_cup_dien * 85000
-            giam_tru_bao = so_ngay_bao * 70000
-            ket_qua_thuc_te = float(pred) - giam_tru_cup_dien - giam_tru_bao
-            
             row_ky['Ket_qua_du_bao'] = ""
             row_lienke['Ket_qua_du_bao'] = ""
-            row_dubao['Ket_qua_du_bao'] = round(max(0, ket_qua_thuc_te), 2)
+            row_dubao['Ket_qua_du_bao'] = round(float(pred), 2)
             
             results.append(row_ky)
             results.append(row_lienke)
