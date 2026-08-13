@@ -24,16 +24,16 @@ def home():
 def predict():
     try:
         data = request.json
-        thang_val = float(data.get('thang', 5))
+        thang_val = float(data.get('thang', 7))
         nhiet_do = float(data.get('nhiet_do', 39))
         do_am = float(data.get('do_am', 69))
         toc_do = float(data.get('toc_do', 9.0))
         
-        so_ngay_cup_dien = float(data.get('cup_dien_cuoi_tuan') or 2)
-        ngay_le = float(data.get('ngay_le') or 3)
-        ngay_nghi_t7_cn = float(data.get('ngay_nghi') or 10)
+        so_ngay_cup_dien = float(data.get('cup_dien_cuoi_tuan') or 0)
+        so_ngay_bao = float(data.get('so_ngay_bao') or 0)
+        ngay_le = float(data.get('ngay_le') or 0)
+        ngay_nghi_t7_cn = float(data.get('ngay_nghi') or 8)
         
-        # Hệ số điều chỉnh mùa vụ thực tế theo tháng
         if thang_val in [3, 4, 5, 6]:
             he_so_mua_vu = 1.085
         elif thang_val in [7, 8, 9, 10, 11]:
@@ -41,37 +41,32 @@ def predict():
         else:
             he_so_mua_vu = 1.050
             
-        # Lượng hóa ảnh hưởng của nhiệt độ và độ ẩm thực tế
-        yeu_to_thoi_tiet = 1.0 + max(0, (nhiet_do - 35) * 0.006) - max(0, (60 - do_am) * 0.0025)
-        
-        # Hệ số điều chỉnh ngày nghỉ lễ & cuối tuần (Tổng số ngày nghỉ nhiều làm giảm ngày sản xuất kinh doanh)
-        # 1 tháng chuẩn có khoảng 8 ngày nghỉ T7-CN. Nếu tổng (ngay_nghi + ngay_le) vượt mức chuẩn, tính hệ số giảm trừ ngày làm việc.
-        tong_ngay_khong_lam_viec = ngay_nghi_t7_cn + ngay_le
-        he_so_ngay_lam_viec = 1.0 - max(0, (tong_ngay_khong_lam_viec - 8) * 0.012)
-        
-        ty_le_tang = (toc_do / 100.0) * he_so_mua_vu * yeu_to_thoi_tiet * he_so_ngay_lam_viec
+        yeu_to_thoi_tiet = 1.0 + max(0, (nhiet_do - 35) * 0.005) - max(0, (60 - do_am) * 0.002)
+        ty_le_tang = (toc_do / 100.0) * he_so_mua_vu * yeu_to_thoi_tiet
 
-        pt1_lk = float(data.get('pt1_lien_ke') or 0)
-        pt1_ky = float(data.get('pt1_ky_truoc') or 0)
+        pt1_ky = float(data.get('pt1_ky_truoc') or 1091277)
+        pt1_lk = float(data.get('pt1_lien_ke') or 1261088)
         pt1 = float(data.get('pt1') or (pt1_ky * (1 + ty_le_tang) * 0.5 + pt1_lk * 1.01 * 0.5))
 
-        pt2_lk = float(data.get('pt2_lien_ke') or 0)
-        pt2_ky = float(data.get('pt2_ky_truoc') or 0)
+        pt2_ky = float(data.get('pt2_ky_truoc') or 1211972)
+        pt2_lk = float(data.get('pt2_lien_ke') or 1670640)
         pt2 = float(data.get('pt2') or (pt2_ky * (1 + ty_le_tang) * 0.5 + pt2_lk * 1.01 * 0.5))
 
-        pt3_lk = float(data.get('pt3_lien_ke') or 0)
-        pt3_ky = float(data.get('pt3_ky_truoc') or 0)
+        pt3_ky = float(data.get('pt3_ky_truoc') or 238729)
+        pt3_lk = float(data.get('pt3_lien_ke') or 345032)
         pt3 = float(data.get('pt3') or (pt3_ky * (1 + ty_le_tang) * 0.5 + pt3_lk * 1.01 * 0.5))
 
-        pt4_lk = float(data.get('pt4_lien_ke') or 0)
-        pt4_ky = float(data.get('pt4_ky_truoc') or 0)
+        pt4_ky = float(data.get('pt4_ky_truoc') or 5000143)
+        pt4_lk = float(data.get('pt4_lien_ke') or 6415389)
         pt4 = float(data.get('pt4') or (pt4_ky * (1 + ty_le_tang) * 0.5 + pt4_lk * 1.01 * 0.5))
 
-        pt5_lk = float(data.get('pt5_lien_ke') or 0)
-        pt5_ky = float(data.get('pt5_ky_truoc') or 0)
+        pt5_ky = float(data.get('pt5_ky_truoc') or 401870)
+        pt5_lk = float(data.get('pt5_lien_ke') or 490409)
         pt5 = float(data.get('pt5') or (pt5_ky * (1 + ty_le_tang) * 0.5 + pt5_lk * 1.01 * 0.5))
 
+        # Trừ sản lượng tổn thất do cúp điện và do ngày bão
         giam_tru_cup_dien = so_ngay_cup_dien * 85000
+        giam_tru_bao = so_ngay_bao * 70000
 
         thang_nang_nong = 1 if (3 <= thang_val <= 6) else 0
         thang_mua = 1 if (7 <= thang_val <= 11) else 0
@@ -82,11 +77,11 @@ def predict():
             'Nhiet_do': nhiet_do, 
             'Do_am': do_am,
             'Mat_do_dan_so': 200, 
-            'So_khach_hang': float(data.get('khach_hang', 26120)),
+            'So_khach_hang': float(data.get('khach_hang', 26625)),
             'Toc_do_phat_trien': toc_do, 
             'Thang_nang_nong': thang_nang_nong,
             'Thang_mua': thang_mua, 
-            'Thang_bao': 0,
+            'Thang_bao': so_ngay_bao,
             'Cup_dien_tuan': 0, 
             'Cup_dien_cuoi_tuan': so_ngay_cup_dien,
             'Ngay_le': ngay_le, 
@@ -96,7 +91,7 @@ def predict():
         }])
 
         prediction = model.predict(df_manual)[0]
-        ket_qua_thuc_te = float(prediction) - giam_tru_cup_dien
+        ket_qua_thuc_te = float(prediction) - giam_tru_cup_dien - giam_tru_bao
         result = round(max(0, ket_qua_thuc_te), 2)
         
         return jsonify({'status': 'success', 'result': f"{result:,.2f}"})
@@ -109,20 +104,20 @@ def download_template():
     df_template = pd.DataFrame({
         'STT': [1, 2, 3],
         'Loai_Ky': ['Cùng kỳ năm trước', 'Tháng liền kề trước', 'Tháng cần dự báo'],
-        'Thang': [5, 3, 5],
+        'Thang': [7, 5, 7],
         'Nam': [2025, 2026, 2026],
         'Nhiet_do': [39, 38, 39],
         'Do_am': [65, 70, 69],
-        'So_khach_hang': [25288, 25963, 26120],
-        'Ngay_le': [2, 0, 3],
-        'Ngay_nghi': [8, 8, 10],
+        'So_khach_hang': [25505, 26570, 26625],
+        'Ngay_le': [0, 0, 0],
+        'Ngay_nghi': [8, 8, 8],
         'Cup_dien_cuoi_tuan': [1, 2, 2],
         'Toc_do_phat_trien': [9, 9, 9],
-        'Nong_lam_nghiep_thuy_san': [1171374, 1663274, None],
-        'Cong_nghiep_Xay_dung': [1253285, 1622186, None],
-        'Thuong_nghiep_khach_san_nhahang': [263268, 283336, None],
-        'Quan_ly_tieu_dung': [5544610, 5548289, None],
-        'Hoat_dong_khac': [441560, 473412, None]
+        'Nong_lam_nghiep_thuy_san': [1091277, 1261088, None],
+        'Cong_nghiep_Xay_dung': [1211972, 1670640, None],
+        'Thuong_nghiep_khach_san_nhahang': [238729, 345032, None],
+        'Quan_ly_tieu_dung': [5000143, 6415389, None],
+        'Hoat_dong_khac': [401870, 490409, None]
     })
     file_path = 'File_Mau_Du_Bao.xlsx'
     df_template.to_excel(file_path, index=False)
@@ -150,16 +145,17 @@ def predict_excel():
             row_lienke = group.iloc[1]
             row_dubao = group.iloc[2]
             
-            thang_val = float(row_dubao.get('Thang', 5))
+            thang_val = float(row_dubao.get('Thang', 7))
             nam_val = float(row_dubao.get('Nam', 2026))
             nhiet_do = float(row_dubao.get('Nhiet_do', 39))
             do_am = float(row_dubao.get('Do_am', 69))
-            khach_hang = float(row_dubao.get('So_khach_hang', 26120))
+            khach_hang = float(row_dubao.get('So_khach_hang', 26625))
             toc_do = float(row_dubao.get('Toc_do_phat_trien', 9))
             
-            so_ngay_cup_dien = float(row_dubao.get('Cup_dien_cuoi_tuan', 2))
-            ngay_le = float(row_dubao.get('Ngay_le', 3))
-            ngay_nghi = float(row_dubao.get('Ngay_nghi', 10))
+            so_ngay_cup_dien = float(row_dubao.get('Cup_dien_cuoi_tuan', 0))
+            so_ngay_bao = float(row_dubao.get('Thang_bao', 0) if 'Thang_bao' in row_dubao else 0)
+            ngay_le = float(row_dubao.get('Ngay_le', 0))
+            ngay_nghi = float(row_dubao.get('Ngay_nghi', 8))
             
             if thang_val in [3, 4, 5, 6]:
                 he_so_mua_vu = 1.085
@@ -168,11 +164,8 @@ def predict_excel():
             else:
                 he_so_mua_vu = 1.050
                 
-            yeu_to_thoi_tiet = 1.0 + max(0, (nhiet_do - 35) * 0.006) - max(0, (60 - do_am) * 0.0025)
-            tong_ngay_khong_lam_viec = ngay_nghi + ngay_le
-            he_so_ngay_lam_viec = 1.0 - max(0, (tong_ngay_khong_lam_viec - 8) * 0.012)
-            
-            ty_le = (toc_do / 100.0) * he_so_mua_vu * yeu_to_thoi_tiet * he_so_ngay_lam_viec
+            yeu_to_thoi_tiet = 1.0 + max(0, (nhiet_do - 35) * 0.005) - max(0, (60 - do_am) * 0.002)
+            ty_le = (toc_do / 100.0) * he_so_mua_vu * yeu_to_thoi_tiet
             
             cols = ['Nong_lam_nghiep_thuy_san', 'Cong_nghiep_Xay_dung', 'Thuong_nghiep_khach_san_nhahang', 'Quan_ly_tieu_dung', 'Hoat_dong_khac']
             du_bao_pt = {}
@@ -195,7 +188,7 @@ def predict_excel():
                 'Nhiet_do': nhiet_do, 'Do_am': do_am,
                 'Mat_do_dan_so': 200, 'So_khach_hang': khach_hang,
                 'Toc_do_phat_trien': toc_do, 'Thang_nang_nong': thang_nang_nong,
-                'Thang_mua': thang_mua, 'Thang_bao': 0,
+                'Thang_mua': thang_mua, 'Thang_bao': so_ngay_bao,
                 'Cup_dien_tuan': 0, 'Cup_dien_cuoi_tuan': so_ngay_cup_dien,
                 'Ngay_le': ngay_le, 'Ngay_nghi': ngay_nghi,
                 'Phu_tai_1': du_bao_pt['Nong_lam_nghiep_thuy_san'], 
@@ -212,7 +205,8 @@ def predict_excel():
             
             pred = model.predict(df_row)[0]
             giam_tru_cup_dien = so_ngay_cup_dien * 85000
-            ket_qua_thuc_te = float(pred) - giam_tru_cup_dien
+            giam_tru_bao = so_ngay_bao * 70000
+            ket_qua_thuc_te = float(pred) - giam_tru_cup_dien - giam_tru_bao
             
             row_ky['Ket_qua_du_bao'] = ""
             row_lienke['Ket_qua_du_bao'] = ""
